@@ -1,0 +1,43 @@
+format_version: v1.0
+type: UniqueComponent
+attributes: {id: drvPic32mEthmac}
+children:
+- type: Symbols
+  children:
+  - type: String
+    attributes: {id: DRV_INTMAC_PHY_TYPE}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: drvPic32mEthmac, value: LAN9303}
+- type: Attachments
+  children:
+  - type: DirectDependency
+    attributes: {id: ETHMAC_PHY_Dependency}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: targetComponentID}
+        children:
+        - {type: Value, value: drvExtPhyLan9303}
+      - type: String
+        attributes: {id: targetAttachmentID}
+        children:
+        - {type: Value, value: libdrvExtPhyLan9303}
+  - type: DirectCapability
+    attributes: {id: libdrvPic32mEthmac}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: targetComponentID}
+        children:
+        - {type: Value, value: tcpipNetConfig_0}
+      - type: String
+        attributes: {id: targetAttachmentID}
+        children:
+        - {type: Value, value: NETCONFIG_MAC_Dependency}
+- type: ElementPosition
+  attributes: {x: '279', y: '43', id: drvPic32mEthmac}
