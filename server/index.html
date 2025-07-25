@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Seguimiento GPS</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=KEY"></script>
+  <style>
+    #map {margin−top: 100px; height: 80vh; width: 100%;}
+#info−posicion {
+  margin−top: 20px;
+  margin−bottom: 10px;
+  text−align: center;
+  font−size: 1.2em;
+  font−family: Arial, sans−serif;
+}
+  </style>
+</head>
+<body>
+  <div id="info-posicion">
+    Lat: −− | Lon: −− | Vel: −− | Dir: −−
+  </div>
+
+  <div id="map"></div>
+  <script>
+    let map, marker;
+    let lastPosition = null;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 17,
+        center: {lat: 0, lng: 0 },
+        mapTypeId: "roadmap"
+      });
+
+      marker = new google.maps.Marker({
+        map: map,
+        position: { lat: 0, lng: 0 },
+        icon: getCustomIcon(0, 0), // dirección inicial 0
+        title: "Vehículo"
+      });
+
+      fetchAndUpdate(); // primera vez
+      setInterval(fetchAndUpdate, 5000); // cada 5 segundos
+      }
+
+function fetchAndUpdate() {
+  fetch("/posicion")
+    .then(res => res.json())
+
+      .then(data => {
+        if (data.lat == null || data.lon == null) return;
+
+        const newPos = { lat: parseFloat(data.lat), lng: parseFloat(data.lon) };
+        const heading = parseInt(data.dir || 0);
+        const speed = parseFloat(data.vel || 0);
+
+        document.getElementById("info-posicion").textContent = `Lat: ${newPos.lat.toFixed(5)} | Lon: ${newPos.lng.toFixed(5)} | Vel: ${speed} m/s | Dir: ${heading}`;
+
+        if (!lastPosition || newPos.lat !== lastPosition.lat || newPos.lng !== lastPosition.lng) {
+          map.setCenter(newPos); // Centra el mapa en el nuevo marcador
+          animateMarkerTo(marker, newPos);
+          marker.setIcon(getCustomIcon(heading, speed));
+          lastPosition = newPos;
+        }
+      });
+}
+
+function getCustomIcon(heading, speed) {
+  if (speed > 1) {
+    // En movimiento: flecha con color según la velocidad
+    let color = "#ffc107"; // amarillo por defecto (≤ 6 m/s)
+    if (speed > 6) {
+      color = "#dc3545"; // rojo si va a más de 6 m/s
+    }
+
+    return {
+      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 4,
+      strokeColor: color,
+      rotation: heading || 0,
+      strokeWeight: 2
+    };
+  } else {
+      // Parado: círculo azul
+      return {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 6,
+        fillColor: "#007bff", // azul
+        fillOpacity: 1,
+        strokeColor: "#0056b3", // azul más oscuro para el borde
+        strokeWeight: 2
+      };
+    }
+  }
+
+    function animateMarkerTo(marker, newPosition) {
+      const steps = 20;
+      const delay = 50; // ms
+      let step = 0;
+      const startPos = marker.getPosition();
+      const deltaLat = (newPosition.lat - startPos.lat()) / steps;
+      const deltaLng = (newPosition.lng - startPos.lng()) / steps;
+
+      const move = () => {
+        if (step >= steps) return;
+        const lat = startPos.lat() + deltaLat * step;
+        const lng = startPos.lng() + deltaLng * step;
+        marker.setPosition(new google.maps.LatLng(lat, lng));
+        step++;
+        setTimeout(move, delay);
+      };
+      move();
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
