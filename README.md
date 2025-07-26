@@ -1,4 +1,4 @@
-Final Year Project developed in 2025
+Final Year Project developed in 2025.
 Development of a real-time remote tracking and monitoring system based
 on the PATISMZ hardware platform. It will primarily use a microcontroller
 and a wireless communications module with data transfer and position tracking technologies, although the hardware includes many more components.
